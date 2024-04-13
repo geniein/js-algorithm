@@ -38,10 +38,10 @@ class Dijkstra {
       return null;
     } else {
       for (let city_name in unvisited_cities) {
-        shortest_path_table[city_name] = Infinity;
+        shortest_path_table[city_name] = { distance: Infinity, prevcity: null };
       }
     }
-    shortest_path_table[start_city.name] = 0;
+    shortest_path_table[start_city.name].distance = 0;
     visited_cities[start_city.name] = this.all_cities[start_city.name];
 
     let pivot_city = start_city.name;
@@ -52,8 +52,8 @@ class Dijkstra {
       for (let city_name in unvisited_cities) {
         if (
           closest_city_name == null ||
-          shortest_path_table[city_name] <
-            shortest_path_table[closest_city_name]
+          shortest_path_table[city_name].distance <
+            shortest_path_table[closest_city_name].distance
         ) {
           closest_city_name = city_name;
         }
@@ -67,27 +67,43 @@ class Dijkstra {
           continue;
         }
         let distance =
-          shortest_path_table[closest_city_name] +
+          shortest_path_table[closest_city_name].distance +
           visited_cities[closest_city_name].adjacent_cities[adjacent_city_name];
 
-        if (shortest_path_table[adjacent_city_name] > distance) {
-          shortest_path_table[adjacent_city_name] = distance;
+        if (shortest_path_table[adjacent_city_name].distance > distance) {
+          shortest_path_table[adjacent_city_name].distance = distance;
+          shortest_path_table[adjacent_city_name].prevcity = closest_city_name;
         }
       }
     }
 
+    this.recursiveCheckPath(end_city.name, shortest_path_table, "");
     return shortest_path_table[end_city.name];
+  }
+
+  recursiveCheckPath(target, table, result) {
+    if (table[target].prevcity == null) {
+      result += target;
+      console.log("finish");
+      console.log(result);
+      return result;
+    }
+    result = this.recursiveCheckPath(table[target].prevcity, table, result);
+    result += "->" + target;
+    console.log(result);
+    return result;
   }
 }
 
 let dijkstra = new Dijkstra();
 
-let seoul = new City("Seoul");
-let wonju = new City("Wonju");
+let seoul = new City("seoul");
+let wonju = new City("wonju");
 let gangneung = new City("gangneung");
 let daejeon = new City("daejeon");
 let jeonju = new City("jeonju");
 let daegu = new City("daegu");
+let busan = new City("busan");
 
 dijkstra.regiterCity(seoul);
 dijkstra.regiterCity(wonju);
@@ -95,6 +111,7 @@ dijkstra.regiterCity(gangneung);
 dijkstra.regiterCity(daejeon);
 dijkstra.regiterCity(jeonju);
 dijkstra.regiterCity(daegu);
+dijkstra.regiterCity(busan);
 
 seoul.addAdjacentCity(wonju, 87);
 seoul.addAdjacentCity(gangneung, 165);
@@ -105,10 +122,12 @@ wonju.addAdjacentCity(seoul, 87);
 wonju.addAdjacentCity(gangneung, 95);
 wonju.addAdjacentCity(daejeon, 118);
 wonju.addAdjacentCity(daegu, 178);
+wonju.addAdjacentCity(busan, 222);
 
 gangneung.addAdjacentCity(seoul, 165);
 gangneung.addAdjacentCity(wonju, 95);
 gangneung.addAdjacentCity(daegu, 212);
+gangneung.addAdjacentCity(busan, 272);
 
 daejeon.addAdjacentCity(seoul, 140);
 daejeon.addAdjacentCity(wonju, 118);
@@ -123,5 +142,10 @@ daegu.addAdjacentCity(wonju, 178);
 daegu.addAdjacentCity(gangneung, 212);
 daegu.addAdjacentCity(daejeon, 122);
 daegu.addAdjacentCity(jeonju, 130);
+daegu.addAdjacentCity(busan, 72);
 
-dijkstra.shortestPath(seoul, daegu);
+busan.addAdjacentCity(daegu, 72);
+busan.addAdjacentCity(wonju, 222);
+busan.addAdjacentCity(gangneung, 272);
+
+console.log(dijkstra.shortestPath(seoul, busan));
